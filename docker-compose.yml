@@ -5,7 +5,7 @@ services:
     php:
         build:
             context: ./
-            dockerfile: docker/php/{PHP_VERSION}.Dockerfile
+            dockerfile: docker/php/${PHP_VERSION}.Dockerfile
         depends_on:
             - mysql
         container_name: php
