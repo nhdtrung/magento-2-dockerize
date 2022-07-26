@@ -1,0 +1,10 @@
+/docker/db/dbdata
+/docker/nginx/logs/
+/.idea
+.idea
+/.phpunit.result.cache
+/vendor/
+.DS_Store
+/src/
+/.env
+/elasticsearchdata/datas/
