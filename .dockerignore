@@ -1,0 +1,8 @@
+# ------------- #
+# Docker ignore #
+# ------------- #
+
+.git
+docs
+README.md
+start.sh
