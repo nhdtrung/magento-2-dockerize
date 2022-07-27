@@ -1,4 +1,4 @@
-FROM php:7.1-fpm
+FROM php:7.2-fpm
 
 # Set working directory
 WORKDIR /var/www/src
@@ -7,6 +7,7 @@ WORKDIR /var/www/src
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 # Install dependencies
+# RUN apt-get -y update --fix-missing
 RUN apt-get update && apt-get install -y \
     build-essential \
     libmcrypt-dev \
@@ -27,6 +28,7 @@ RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg-dev \
     libgmp-dev \
+    libsodium-dev \
     librabbitmq-dev
 
 # Install supervisord
@@ -35,30 +37,22 @@ RUN apt-get -y update \
     && apt-get install -y libicu-dev \
     && docker-php-ext-install pdo_mysql mysqli mbstring zip exif pcntl \
     && docker-php-ext-install intl \
-    && docker-php-ext-configure intl \
     && docker-php-ext-install bcmath \
     && docker-php-ext-install soap \
-    && docker-php-ext-install mcrypt \
     && docker-php-ext-install gmp \
-    && docker-php-ext-install xsl
+    && docker-php-ext-install xsl \
+    && docker-php-ext-configure intl \
+    && docker-php-ext-enable sodium
 
 # Install GD
-RUN apt-get install -y \
-        libfreetype6-dev \
-        libjpeg62-turbo-dev \
-     && docker-php-ext-configure gd \
-          --enable-gd-native-ttf \
-          --with-freetype-dir=/usr/include/freetype2 \
-          --with-png-dir=/usr/include \
-          --with-jpeg-dir=/usr/include \
-    && docker-php-ext-install gd \
-    && docker-php-ext-enable gd
+RUN docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
+    && docker-php-ext-install gd
 
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install xdebug
-RUN if [ ${INSTALL_XDEBUG} = true ]; then \
+RUN if [ ${INSTALL_XDEBUG} ]; then \
  # Install the xdebug extension
  if [ $(php -r "echo PHP_MAJOR_VERSION;") = "5" ]; then \
    pecl install xdebug-2.5.5; \
