@@ -37,6 +37,7 @@ services:
             - ./:${WORKING_DIR}
             - ./docker/nginx/logs:/var/log/nginx
             - ./docker/nginx/conf.d/:/etc/nginx/conf.d/
+            - ./docker/nginx/certs:/root/ssl/certs
         networks:
             - app-network
 

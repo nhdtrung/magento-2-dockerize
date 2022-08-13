@@ -39,7 +39,8 @@ RUN apt-get -y update \
     && docker-php-ext-install gd \
     && docker-php-ext-install bcmath \
     && docker-php-ext-install soap \
-    && docker-php-ext-install xsl
+    && docker-php-ext-install xsl \
+    && docker-php-ext-install sockets
 
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
