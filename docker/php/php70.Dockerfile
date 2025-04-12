@@ -34,28 +34,6 @@ RUN apt-get update && apt-get install -y \
 # Install Composer (locally available)
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-# Install dependencies
-# RUN apt-get update && apt-get install -y \
-#     build-essential \
-#     libmcrypt-dev \
-#     libpng-dev \
-#     locales \
-#     zip \
-#     jpegoptim optipng pngquant gifsicle \
-#     vim \
-#     unzip \
-#     git \
-#     libxslt-dev \
-#     curl \
-#     libzip-dev \
-#     libonig-dev \
-#     libxml2-dev \
-#     libfreetype6-dev \
-#     zlib1g-dev \
-#     libpng-dev \
-#     libjpeg-dev \
-#     librabbitmq-dev
-
 # Install supervisord, Nginx, and other system dependencies; configure PHP extensions
 RUN apt-get -y update \
     && apt-get install -y nginx supervisor cron \
@@ -84,21 +62,15 @@ RUN apt-get install -y \
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Xdebug (commented out - uncomment and adjust version if needed)
-#RUN if [ ${INSTALL_XDEBUG} = true ]; then \
-#  if [ $(php -r "echo PHP_MAJOR_VERSION;") = "5" ]; then \
-#    pecl install xdebug-2.5.5; \
-#  else \
-#    if [ $(php -r "echo PHP_MINOR_VERSION;") = "0" ]; then \
-#      pecl install xdebug-2.9.0; \
-#    else \
-#      pecl install xdebug-2.9.8; \
-#    fi \
-#  fi && \
-#  docker-php-ext-enable xdebug; \
-#fi
+RUN apt-get update && apt-get install -y \
+    $PHPIZE_DEPS \
+    --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/*
+RUN pecl install xdebug-2.7.2;
+RUN docker-php-ext-enable xdebug;
 
 # Copy xdebug configuration for remote debugging if desired
-#COPY ./xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
+COPY ./xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
 
 # Install composer globally (a second installation if needed)
 RUN echo "Install composer globally"
