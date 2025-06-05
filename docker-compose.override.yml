@@ -1,0 +1,18 @@
+version: '3'
+services:
+    webserver:
+        platform: linux/amd64
+        image: nginx:alpine
+        container_name: webserver
+        working_dir: ${WORKING_DIR}
+        depends_on:
+            - app
+        ports:
+            - ${HTTP_PORT}:80
+            - ${HTTPS_PORT}:443
+        volumes:
+            - ./:${WORKING_DIR}
+            - ./docker/nginx/logs:/var/log/nginx
+            - ./docker/nginx/conf.d/:/etc/nginx/conf.d/
+        networks:
+            - app-network

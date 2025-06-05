@@ -10,7 +10,7 @@ RUN sed -i 's|http://deb.debian.org/debian|http://archive.debian.org/debian|g' /
 WORKDIR /var/www/src
 
 # Continue with your installation steps...
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --allow-unauthenticated\
     build-essential \
     libmcrypt-dev \
     libpng-dev \
@@ -32,12 +32,12 @@ RUN apt-get update && apt-get install -y \
     librabbitmq-dev
 
 # Install Composer (locally available)
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer  --version=1.8.2
 
 # Install supervisord, Nginx, and other system dependencies; configure PHP extensions
-RUN apt-get -y update \
-    && apt-get install -y nginx supervisor cron \
-    && apt-get install -y libicu-dev \
+RUN apt-get -y --allow-unauthenticated update \
+    && apt-get install -y --allow-unauthenticated nginx supervisor cron \
+    && apt-get install -y --allow-unauthenticated libicu-dev \
     && docker-php-ext-install pdo_mysql mysqli mbstring zip exif pcntl \
     && docker-php-ext-install intl \
     && docker-php-ext-configure intl \
@@ -47,7 +47,7 @@ RUN apt-get -y update \
     && docker-php-ext-install xsl
 
 # Install GD
-RUN apt-get install -y \
+RUN apt-get install -y --allow-unauthenticated  \
         libfreetype6-dev \
         libjpeg62-turbo-dev \
     && docker-php-ext-configure gd \
@@ -62,7 +62,7 @@ RUN apt-get install -y \
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Xdebug (commented out - uncomment and adjust version if needed)
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --allow-unauthenticated \
     $PHPIZE_DEPS \
     --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
