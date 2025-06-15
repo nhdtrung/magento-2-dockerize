@@ -12,7 +12,7 @@ services:
         working_dir: ${WORKING_DIR}
         environment:
             APP_ENV: local
-            XDEBUG_CONFIG: remote_host=host.docker.internal remote_port=9000 # for xdebug
+            XDEBUG_CONFIG: remote_host=host.docker.internal remote_port=9003 # for xdebug
             PHP_IDE_CONFIG: serverName=docker # for xdebug servername
         volumes:
             - ./src/:${WORKING_DIR}/src
@@ -25,8 +25,8 @@ services:
 
     #Nginx Service
     webserver:
-        image: nginx:alpine
         # platform: linux/amd64
+        image: nginx
         container_name: ${WEBSERVER}
         working_dir: ${WORKING_DIR}
         depends_on:

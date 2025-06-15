@@ -12,4 +12,4 @@ docker-compose up -d --build --remove-orphans --force-recreate
 
 echo "---Installing dependencies---"
 # docker-compose exec php composer config -g http-basic.repo.magento.com ${key} ${secret}
-docker-compose exec php composer install --ignore-platform-reqs --no-interaction --working-dir=/var/www/src
+# docker-compose exec php composer install --ignore-platform-reqs --no-interaction --working-dir=/var/www/src

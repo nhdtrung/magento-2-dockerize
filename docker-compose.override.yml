@@ -1,18 +1,74 @@
-version: '3'
+version: '3.8'
 services:
-    webserver:
-        platform: linux/amd64
-        image: nginx:alpine
-        container_name: webserver
-        working_dir: ${WORKING_DIR}
-        depends_on:
-            - app
-        ports:
-            - ${HTTP_PORT}:80
-            - ${HTTPS_PORT}:443
+
+    # PHP Service - development overrides
+    php:
+        environment:
+            APP_ENV: local
+            XDEBUG_MODE: debug,develop
+            XDEBUG_CONFIG: client_host=host.docker.internal client_port=9003
+            XDEBUG_START_WITH_REQUEST: yes
         volumes:
-            - ./:${WORKING_DIR}
-            - ./docker/nginx/logs:/var/log/nginx
-            - ./docker/nginx/conf.d/:/etc/nginx/conf.d/
+            # Development-specific volumes
+            - ./:/app:delegated
+            - ./docker/php/conf.d/xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini:ro
+            - ./docker/php/conf.d/error_reporting.ini:/usr/local/etc/php/conf.d/error_reporting.ini:ro
+            - ./docker/php/custom.ini:/usr/local/etc/php/conf.d/custom.ini:ro
+        # Remove resource limits during development
+        deploy:
+            resources:
+                limits:
+                    memory: 2G
+
+    # Webserver - development overrides
+    webserver:
+        volumes:
+            # Mount entire project for development
+            - ./:/app:ro
+        environment:
+            - NGINX_HOST=localhost
+        # No need for explicit ports as they're defined in the main compose file
+
+    # MySQL - development overrides
+    mysql:
+        command: [
+            '--character-set-server=utf8mb4',
+            '--collation-server=utf8mb4_unicode_ci',
+            '--default-authentication-plugin=mysql_native_password',
+            '--slow-query-log=1',
+            '--slow-query-log-file=/var/log/mysql/mysql-slow.log',
+            '--long-query-time=1'
+        ]
+        volumes:
+            - ./docker/db/init:/docker-entrypoint-initdb.d:ro
+            - ./docker/db/logs:/var/log/mysql:delegated
+
+    # Enable composer service for development
+    composer:
+        profiles: [] # Always active in development
+        volumes:
+            - ~/.composer/cache:/tmp/composer-cache:delegated
+
+    # Development tools
+    phpmyadmin:
+        image: phpmyadmin/phpmyadmin
+        container_name: phpmyadmin
+        environment:
+            PMA_HOST: mysql
+            PMA_USER: root
+            PMA_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+        ports:
+            - "8080:80"
+        depends_on:
+            - mysql
         networks:
             - app-network
+
+    # Elasticsearch - development settings
+    elasticsearch:
+        environment:
+            ES_JAVA_OPTS: -Xms512m -Xmx512m
+
+    # Redis - development settings
+    redis:
+        command: ["redis-server", "--appendonly", "yes", "--requirepass", "${REDIS_PASSWORD:-redis}"]
